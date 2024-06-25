@@ -5,7 +5,7 @@ Also Requires:
 3) SpeechCommands/ (with 32 classes)
    
 
-[name].sh with the following lines:
+4) [name].sh with the following lines:
 #!/bin/bash
  
 #SBATCH --job-name=speech_command
