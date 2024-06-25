@@ -1,8 +1,9 @@
 Also Requires:
 
-.env/
-enviornment/
-SpeechCommands/ (with 32 classes)
+1) .env/
+2) enviornment/
+3) SpeechCommands/ (with 32 classes)
+   
 
 [name].sh with the following lines:
 #!/bin/bash
