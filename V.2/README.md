@@ -1,7 +1,7 @@
 # Issues/Incomplete  
 1) All code is contained in one file, terrible formatting
 2) Model is generated everytime code is run
-3) Too much noise, its noticeable  
+3) Too much noise, its noticeable (CURRENT WIP)  
 
 
 # Requirements
