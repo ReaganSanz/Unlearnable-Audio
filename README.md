@@ -2,10 +2,10 @@ Also Requires:
 
 1) .env/
 2) enviornment/
-3) SpeechCommands/ (with 32 classes)
+3) SpeechCommands/ (I am currently using 12 classes)
    
 
-4) [name].sh with the following lines:
+5) [name].sh with the following lines:
 
 #!/bin/bash  
  
