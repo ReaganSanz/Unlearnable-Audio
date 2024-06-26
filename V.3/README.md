@@ -1,5 +1,5 @@
 # Progress  
-It appears like the Clean and Noisy audio have imperceptible differences.  
+It appears like the Clean and Noisy audio have imperceptible differences (Please see NEW requirement below)  
 
 # Issues/Incomplete  
 1) Need to be sure I am saving the noisy and clean audio correctly for comparison
