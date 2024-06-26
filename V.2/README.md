@@ -9,7 +9,7 @@ Also Requires:
 
 1) .env/
 2) enviornment/
-3) SpeechCommands/ (with 32 classes)
+3) SpeechCommands/ (I used 12 classes instead)
    
 
 4) [name].sh with the following lines:
