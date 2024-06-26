@@ -1,5 +1,7 @@
 # Issues/Incomplete  
 1) Last Section, "UPDATE NOISE, SAVE MODEL", is not working
+2) All code is contained in one file, terrible formatting
+3) Model is generated everytime code is ran
 
 
 # Requirements
