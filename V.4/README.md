@@ -1,13 +1,12 @@
 # Progress  
-New min-min function implemented. Noise sample saved is returned from this function for comparison with clean sample (NOTE: See issue 2)
+New min-min function implemented. Noise sample saved is returned from this function for comparison with clean sample (Updated last: 10:22 AM, 6/27)
 
 # Issues/Incomplete  
 1) Still not entirely sure if the min-min function is correct
-2) Method of saving noisy graph is not working. (CURRENTLY FIXING)
-3) Need to test different values for epsilon, step_size, etc. Current tests have it creating noise, however it is still noticable.  
-4) All code is contained in one file, terrible formatting  
-5) Model is generated everytime code is run  
-
+2) Need to test different values for epsilon, step_size, etc. Current tests have it creating noise, however it is still noticable.
+3) All code is contained in one file, terrible formatting
+4) Model is generated everytime code is run
+   
 
 # Requirements
 Also Requires:
