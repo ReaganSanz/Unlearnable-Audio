@@ -1,5 +1,5 @@
 # Progress  
-New min-min function implemented. Noise sample saved is returned from this function for comparison with clean sample (Updated last: 10:22 AM, 6/27)
+New min-min function implemented. Noise sample saved is returned from this function for comparison with clean sample (Updated last: 10:58 AM, 6/27/24)
 
 # Issues/Incomplete  
 1) Still not entirely sure if the min-min function is correct
