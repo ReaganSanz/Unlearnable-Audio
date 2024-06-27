@@ -25,7 +25,7 @@ import os
 n_epoch = 4                 # number of epochs
 batch_size = 256            # batch size
 target_error_rate = 0.5     # loss threshold 
-target_accuracy_rate = 50.0 # accuracy threshold
+target_accuracy_rate = 65.0 # accuracy threshold
 eps = 0.005                     # epsilon
 step_size = 0.01            # distance of each step (in min-min attack)
 train_step = 10             # number of train steps the model will do in each epoch (during Min-Min attack)
@@ -511,8 +511,9 @@ while condition:
     #    print("Current working directory:", os.getcwd(), flush=True)
         # Save the same samples before and after noise addition
         for i in range(EXAMPLES):
-            clean = clean_waveform_list[i]
-            noisy = perturb_audio[i]
+           # clean = clean_waveform_list[i]
+            clean = data[i].cpu().numpy()
+            noisy = perturb_audio[i].cpu().detach().numpy()
         #    noisy = noisy_waveform_list[i]
 
             # Save clean waveform
@@ -523,8 +524,9 @@ while condition:
             torchaudio.save(f'sample_clean/clean_{i}.wav', clean_waveform_tensor, SR)
             
             # Save noisy waveform
-            noisy_audio = noisy.cpu().detach().numpy()
-            noisy_audio_tensor = torch.tensor(noisy_audio).to(device).cpu()
+           # noisy_audio = noisy.cpu().detach().numpy()
+           # noisy_audio_tensor = torch.tensor(noisy_audio).to(device).cpu()
+            noisy_audio_tensor = torch.tensor(noisy).cpu()
            # plt.plot(noisy_waveform_tensor.t().numpy())
             plt.plot(noisy_audio_tensor.t().numpy())
             plt.savefig(f'sample_noise/noise_plot{i}.png')
@@ -572,7 +574,7 @@ print(noise)
 print(noise.shape)
 print('Noise saved at %s ' % (os.path.join(ex_name, 'perturbation.pt')), flush=True)
 
-
+print(f"VARIABLES: \n Epochs: {n_epoch} \n Target_Acc: {target_accuracy_rate}% \n Epsilon: {eps} \n Step Size: {step_size} \n Number of steps: {train_step})", flush=True)
 
 
 
