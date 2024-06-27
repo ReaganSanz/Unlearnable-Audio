@@ -25,10 +25,12 @@ import os
 n_epoch = 4                 # number of epochs
 batch_size = 256            # batch size
 target_error_rate = 0.5     # loss threshold 
-target_accuracy_rate = 65.0 # accuracy threshold
-eps = 0.005                     # epsilon
-step_size = 0.01            # distance of each step (in min-min attack)
+target_accuracy_rate = 70.0 # accuracy threshold
+eps = 0.01                  # epsilon
+step_size = eps/20          # distance of each step (in min-min attack)
 train_step = 10             # number of train steps the model will do in each epoch (during Min-Min attack)
+# Note, train_step can be raised if unlearnability is too low
+# This is more iterations in PGD
 ex_name = "experiments"     # folder name to save model to
 # Used in Testing/debugging
 SR = 16000
@@ -250,44 +252,7 @@ def perturb_eval(random_noise, train_loader, model, startAndEnd_list, mask_cord_
         err_meter.update(err/len(labels))
     return loss_meter.avg, err_meter.avg
                 
-# input: images (perturbed images), labels (to get loss), base_model (target model), optmi, crit, and random_npose
-# min_min in toolbox.py:
-# inner op, trying to optimize delta/perturbed image to reduce trianing loss
-# if random_noise is None, check first 
-# IMAGES SENT TO MIN-MIN ARE CLEAN (oops)
-# random_noise is used to store pertubrs, its the delta
-# perturb_img = Varaible (images.data + random_noise), adds noise to img
-# then clear after.
 
-#for in range.. is pgd attack.
-# need to set the specific number of steps. They use 20.
-# Also, need to specify the step size
-# .00784 is used for their alpha/step size. 3/255 was used.
-# if audio is [-1,1], eps = 0.03, then step_size could be even smaller. eps/50 or eps/100
-#   need to iteratively manipulate the perturbed image
-#   in each iteration can only change by eps/50 amount
-#   but you can preform MANY steps.
-# inner can only preform 20 total, this one can be many
-
-# if eps/100 * 200 steps. In ever step, two directions, either add step or minus from signal (?)
-# hopefully after 200 steps, some of noise poinats can reach bounary (0.03 eps in our exmaple)
-# if u set step_size to VERY small like eps/1000, the max perturbation you can add to signal is still very small
-# need to make sure it can eventually reach the boundary of eps
-
-# in each for in random (num_steps)
-# input perturb img (AKA X')( logit=model(perturb_img)
-# loss is with repsect to perturb img
-#   then perutb_img.retaingrad() (calc gradients of loss with respect to preturb img)
-# eta = self.step_size * perturb_img... is step in Sample_wise generation in paper
-#   sign is perturb_img.grad.sign()
-# eta is a*sign(...) in papr
-# then, perturb_img = Variable(perturb_img.data+eta,...)
-# and make sure eta is within the boundary (eta = torch.clamp(perturb-images.data))
-#   clamp ensures in range
-# then. eta is added back to image then image is also clamped
-
-# after all these 20 steps, return pertub_img and eta.
-# need to implement this
 class PerturbationTool:
     def __init__(self, epsilon, step_size, num_steps):
         self.epsilon = epsilon
@@ -574,7 +539,7 @@ print(noise)
 print(noise.shape)
 print('Noise saved at %s ' % (os.path.join(ex_name, 'perturbation.pt')), flush=True)
 
-print(f"VARIABLES: \n Epochs: {n_epoch} \n Target_Acc: {target_accuracy_rate}% \n Epsilon: {eps} \n Step Size: {step_size} \n Number of steps: {train_step})", flush=True)
+print(f"VARIABLES: \n Epochs: {n_epoch} \n Target_Acc: {target_accuracy_rate}% \n Epsilon: {eps} \n Step Size: {step_size} \n Number of steps: {train_step}", flush=True)
 
 
 
