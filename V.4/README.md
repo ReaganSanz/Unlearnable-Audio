@@ -5,7 +5,7 @@ New min-min function implemented. Noise sample saved is returned from this funct
 1) Still not entirely sure if the min-min function is correct
 2) Need to test different values for epsilon, step_size, etc. Current tests have it creating noise, however it is still noticable.
 3) All code is contained in one file, terrible formatting
-4) Model is generated everytime code is run
+
    
 
 # Requirements
