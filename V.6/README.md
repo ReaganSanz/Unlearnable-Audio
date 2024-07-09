@@ -1,8 +1,13 @@
+# Update:  
+-Sampling Rate Variable Fixed  
+(LAST UPDATED: 10:12 AM, 7/9/24)
+
+
 # Progress  
 1) Shuffling Problem Fixed: The train_loader was being randomly shuffled- leading to mismatched noise + samples in trainPerturb.py (perturbation.pt was holding different orders each time)
 2) Indentation Problem Fixed: One of the for loops was supposed to be nested, it was accidentally not indented correctly
 3) On a somewhat noisy test, it had around 20% accuracy- indicacting some level of unlearning due to noise generation.
-4) NOTE: I am currently using loss instead of accuracy for threshold. And MAKE SURE seed value is the same in both programs
+4) NOTE: I am currently using loss instead of accuracy for threshold. And MAKE SURE seed value is the same in both programs  
 
 
 
