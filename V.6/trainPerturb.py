@@ -22,8 +22,9 @@ perturb_tensor_path = "experiments/perturbation.pt"
 log_interval = 20
 n_epoch = 10
 poison_rate = 1.0
-## MAKE SURE THIS MATCHES SEED IN PERTURBATION CODE!!!
+## MAKE SURE THESE BELOW MATCH IN PERTURBATION CODE!!!
 seed = 8   
+transform_sample_rate = 16000
 
 
 
@@ -114,8 +115,7 @@ print("Sample rate of waveform: {}".format(sample_rate))
     
 # Contains names of all sound labels
 labels = sorted(list(set(datapoint[2] for datapoint in train_set)))
-new_sample_rate = 8000
-transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=new_sample_rate)
+transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=transform_sample_rate)
 transformed = transform(waveform)
 
 
@@ -312,7 +312,7 @@ def train(model, epoch, log_interval):
         # print training stats
         if batch_idx % log_interval == 0:
             print(f"Train Epoch: {epoch} [{batch_idx * len(data)}/{len(poison_train_loader.dataset)} ({100. * batch_idx / len(poison_train_loader):.0f}%)]\tLoss: {loss.item():.6f}")
-
+        
         # update progress bar
         pbar.update(pbar_update)
         # record loss
@@ -328,7 +328,7 @@ def get_likely_index(tensor):
     return tensor.argmax(dim=-1)
 
 
-def test(model, epoch):
+def test(model, epoch, total_acc):
     model.eval()
     correct = 0
     for data, target in test_loader:
@@ -345,8 +345,10 @@ def test(model, epoch):
 
         # update progress bar
         pbar.update(pbar_update)
+    acc = (100. * correct / len(test_loader.dataset))
+    print(f"\nTest Epoch: {epoch}\tAccuracy: {correct}/{len(test_loader.dataset)} ({acc:.0f}%)\n")
+    total_acc.append(acc)
 
-    print(f"\nTest Epoch: {epoch}\tAccuracy: {correct}/{len(test_loader.dataset)} ({100. * correct / len(test_loader.dataset):.0f}%)\n")
 
 
 pbar_update = 1 / (len(poison_train_loader) + len(test_loader))
@@ -354,12 +356,16 @@ losses = []
 
 # The transform needs to live on the same device as the model and the data.
 transform = transform.to(device)
+total_acc = []
 with tqdm(total=n_epoch) as pbar:
     for epoch in range(1, n_epoch + 1):
+        # Train
+        print("="*20 + "Training Epoch %d" % (epoch) + "="*20, flush=True)
         train(model, epoch, log_interval)
-        test(model, epoch)
+        # Eval
+        test(model, epoch, total_acc)
         scheduler.step()
-
+print (f"Accuracy Plot coords: {total_acc}")
 # Let's plot the training loss versus the number of iteration.
 #plt.plot(losses)
 #plt.title("training loss")
