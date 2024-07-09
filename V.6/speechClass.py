@@ -27,12 +27,13 @@ import os
 batch_size = 256            # batch size (increase to speed up job) as 256
 target_error_rate = 0.01    # loss threshold (CURRENTLY USING)
 target_accuracy_rate = 90.0 # accuracy threshold increase
-eps = 0.01                  # epsilon   increase, make sure noise within range
+eps = 0.025                  # epsilon   increase, make sure noise within range
 step_size = eps/25          # distance of each step (in min-min attack)
 train_step = 20             # number of train steps the model will do in each epoch (during Min-Min attack) increase
 # Note, train_step can be raised if unlearnability is too low
 # This is more iterations in PGD
 seed = 8
+transform_sample_rate = 16000
 ex_name = "experiments"     # folder name to save model to
 # Used in Testing/debugging
 SR = 16000
@@ -87,17 +88,19 @@ print("Sample rate of waveform: {}".format(sample_rate))
 
 # Contains names of all sound labels
 label_types = sorted(list(set(datapoint[2] for datapoint in train_set)))
-new_sample_rate = 8000
-transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=new_sample_rate)
+
+# TRANSFORMATIONS
+transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=transform_sample_rate)
 transformed = transform(waveform)
 
 
 # Normalize to [-1, 1] range
-# DO I NEED TO NORMALIZE???
-print("Minimum value of waveform:", transformed.min().item(), flush=True)
-print("Maximum value of waveform:", transformed.max().item(), flush=True)
 transformMin = transformed.min().item()
 transformMax = transformed.max().item()
+transformed = 2 * (transformed - transformMin) / (transformMax - transformMin) - 1
+print("Minimum value of waveform:", transformed.min().item(), flush=True)
+print("Maximum value of waveform:", transformed.max().item(), flush=True)
+
 
 
 def label_to_index(word):
