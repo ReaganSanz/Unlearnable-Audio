@@ -1,0 +1,34 @@
+import matplotlib.pyplot as plt
+
+### Data
+epochs = list(range(1, 11))  # Epochs from 1 to 10
+# Accuracies (NOTE: Replace with accuracy values from your tests)
+accuracy_clean = [68.31234256926952, 80.50377833753149, 85.31486146095718, 84.03022670025189, 87.63224181360202, 87.40554156171285, 88.28715365239294, 86.29722921914357, 87.80856423173803, 85.34005037783375]
+accuracy_008_noise = [19.1183879093199, 18.71536523929471, 23.702770780856422, 18.18639798488665, 18.690176322418136, 24.534005037783377, 21.486146095717885, 20.428211586901764, 18.035264483627206, 18.84130982367758]
+accuracy_01_noise = [14.584382871536524, 15.314861460957179, 19.82367758186398, 22.216624685138537, 20.428211586901764, 10.780856423173804, 26.448362720403022, 12.16624685138539, 18.84130982367758, 16.14609571788413]
+accuracy_025_noise = [15.566750629722922, 22.87153652392947, 20.453400503778337, 8.463476070528968, 23.375314861460957, 21.838790931989923, 15.44080604534005, 13.97984886649874, 15.717884130982368, 16.32241813602015]
+
+accuracy_resample_8k = [42.39294710327456, 27.002518891687657, 30.35264483627204, 25.743073047858942, 25.894206549118387, 29.395465994962215, 34.5088161209068, 33.80352644836272, 31.410579345088163, 32.09068010075567]
+
+
+### Plotting the accuracy values
+# Episilon Variation
+plt.plot(epochs, accuracy_clean, 'b-', label='Clean')  # Blue line
+plt.plot(epochs, accuracy_008_noise, 'g-', label='0.008 Eps')  # Red line
+plt.plot(epochs, accuracy_01_noise, 'purple', label='0.01 Eps')  # Purple line
+plt.plot(epochs, accuracy_025_noise, 'cyan', label='0.025 Eps')  # Cyan line
+
+# Transform Variation
+plt.plot(epochs, accuracy_resample_8k, 'r-', label='8 kHz (0.01 Eps)') # lime line
+
+
+### Adding title and labels
+plt.ylim(0, 100)
+plt.title('Accuracy over Epochs')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy (%)')
+plt.legend()
+
+### Save the plot
+plt.savefig('acc_plot.png')
+plt.close()
