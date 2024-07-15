@@ -8,7 +8,6 @@ from tqdm import tqdm
 from torch.autograd import Variable
 from torch.utils.data import SubsetRandomSampler
 import os
-import io
 import toolbox
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -41,9 +40,6 @@ print("Sample rate of waveform: {}".format(sample_rate))
 
 label_types = sorted(list(set(datapoint[2] for datapoint in train_set)))
 
-transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=sample_rate)
-transformed = transform(waveform)
-
 def collate_fn(batch):
     tensors, targets = [], []
     for waveform, _, label, *_ in batch:
@@ -74,8 +70,7 @@ train_loader = torch.utils.data.DataLoader(
 
 
 # setup model and necessities
-model = toolbox.M5(n_input=transformed.shape[0], n_output=len(label_types))
-# model = toolbox.M5(n_input=transform.shape[0], n_output=len(label_types))
+model = toolbox.M5(n_input=waveform.shape[0], n_output=len(label_types))
 model.to(device)
 optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0001)
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=STEP_SIZE, gamma=GAMMA)
