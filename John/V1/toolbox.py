@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchaudio.datasets import SPEECHCOMMANDS
 from torch.autograd import Variable
+import torchaudio
 from scipy.signal import butter, lfilter
 import numpy as np
 import os
@@ -69,6 +70,16 @@ class SubsetSC(SPEECHCOMMANDS):
             random.seed(SEED)
             random.shuffle(self._walker)
 
+class TransformedSC(SubsetSC):
+    def __init__(self, subset, sample_rate):
+        super().__init__(subset=subset)
+        self.sample_rate = sample_rate
+
+    def __getitem__(self, idx):
+        waveform, sample_rate, label, *rest = super().__getitem__(idx)
+        transformed_waveform = apply_transformations(waveform, sample_rate)
+        return transformed_waveform, sample_rate, label, *rest
+
 class PoisonSC(SubsetSC):
     def __init__(self, subset, poison_rate=1.0, perturb_tensor_filepath=None, patch_location='center'):
         super().__init__(subset=subset)
@@ -90,31 +101,17 @@ class PoisonSC(SubsetSC):
             waveform, sample_rate, label, *_ = self[idx]
             waveform = self._standardize_waveform(waveform)
           
-            '''
-            if idx == 0:
-                print(f"Noise tensor for index {idx}:")
-                print(self.perturb_tensor[idx % len(self.perturb_tensor)])
-                noise_tensor = torch.tensor(self.perturb_tensor[0]).unsqueeze(0) 
-                torchaudio.save("./test-testing/first_noise2.wav", noise_tensor, sample_rate)
-                plt.figure()
-                plt.plot(self.perturb_tensor[0])
-                plt.savefig("./test-testing/first_noise2.png")
-                plt.close()
-            '''
             num_channels = waveform.shape[0]
             poisoned_waveform = np.zeros_like(waveform.numpy())
             for channel in range(num_channels):
                 poisoned_waveform[channel] = np.clip(waveform[channel].numpy() + noise, -1, 1)
+            
+            # applying transformations to poisoned dataset
+            poisoned_waveform = torch.tensor(poisoned_waveform)
+            poisoned_waveform = apply_transformations(poisoned_waveform, sample_rate)
+
             self.poisoned_samples[idx] = (torch.tensor(poisoned_waveform), sample_rate, label)
-            '''
-            if idx == 0:
-                print("Saving first sample...", flush=True)
-                torchaudio.save('./test-testing/first_noisy__sample2.wav', torch.tensor(poisoned_waveform), sample_rate)
-                plt.figure()
-                plt.plot(poisoned_waveform[0]) # was [0]
-                plt.savefig('./test-testing/first_noisy_sample2.png')
-                plt.close()
-            '''
+
     def __getitem__(self,idx):
         if idx in self.poisoned_samples:
             return self.poisoned_samples[idx]
@@ -232,12 +229,11 @@ def perturb_eval(random_noise, train_loader, model, startAndEnd_list, mask_cord_
         err_meter.update(err/len(labels))
     return loss_meter.avg, err_meter.avg
 
-def train(model, epoch, log_interval, train_loader, transform, optimizer, pbar, pbar_update, losses):
+def train(model, epoch, log_interval, train_loader, optimizer, pbar, pbar_update, losses):
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         data = data.to(device)
         target = target.to(device)
-        #data = transform(data)
         output = model(data)
         loss = F.nll_loss(output.squeeze(), target)
         optimizer.zero_grad()
@@ -254,13 +250,12 @@ def number_of_correct(pred, target):
 def get_likely_index(tensor):
     return tensor.argmax(dim=-1)
 
-def test(model, epoch, total_acc, test_loader, transform, pbar, pbar_update):
+def test(model, epoch, total_acc, test_loader, pbar, pbar_update):
     model.eval()
     correct = 0
     for data, target in test_loader:
         data = data.to(device)
         target = target.to(device)
-        #data = transform(data)
         output = model(data)
         pred = get_likely_index(output)
         correct += number_of_correct(pred, target)
@@ -281,4 +276,19 @@ def pad_sequence(batch):
     batch = torch.nn.utils.rnn.pad_sequence(batch, batch_first=True, padding_value=0.)
     return batch.permute(0, 2, 1)
 
+def apply_transformations(waveform, sample_rate):
+    # LOW PASS FILTER
+    '''cutoff = 4000   # currently running with 4000
+    waveform = torchaudio.functional.lowpass_biquad(waveform, sample_rate, cutoff)'''
 
+    # QUANTIZATION
+    '''ql = 256    # trained on 256
+    waveform = torch.round(waveform * (ql - 1)) / (ql - 1)'''
+
+    # RE-SAMPLE
+    transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=8000)
+    waveform = transform(waveform)
+    transform = torchaudio.transforms.Resample(orig_freq=8000, new_freq=sample_rate)
+    waveform = transform(waveform)
+    
+    return waveform
