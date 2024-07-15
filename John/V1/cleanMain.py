@@ -9,15 +9,16 @@ import toolbox
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-BATCH_SIZE = 256            # batch size: increase to speed up job
+BATCH_SIZE = 512            # batch size: increase to speed up job
 LOG_INTERVAL = 20           # log interval
-EPOCHS = 10                 # number of epochs for training
+EPOCHS = 15                 # number of epochs for training
 CUTOFF_FREQUENCY = 4000     # 4 KHz
 QUANTIZATION_LEVEL = 256
-SR = 8000
+SR = 16000
 
 # create training and testing split
-train_set = toolbox.SubsetSC("training")
+#train_set = toolbox.SubsetSC("training")
+train_set = toolbox.TransformedSC('Training', SR)
 test_set = toolbox.SubsetSC("testing")
 
 # testing first dataset sample
@@ -58,31 +59,9 @@ test_loader = torch.utils.data.DataLoader(
     pin_memory=pin_memory,
 )
 
-# ORIGINAL TRANSFORM
-transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=sample_rate)
-transformed = transform(waveform)
-
-# LOW PASS FILTER
-'''transform = torchaudio.functional.lowpass_biquad(waveform, sample_rate, CUTOFF_FREQUENCY)
-transformMin = transform.min().item()
-transformMax = transform.max().item()
-transformed = 2 * (transform - transformMin) / (transformMax - transformMin) - 1'''
-
-# QUANTIZATION
-'''transform = torch.round(waveform * (QUANTIZATION_LEVEL - 1)) / (QUANTIZATION_LEVEL - 1)'''
-
-# RE-SAMPLE
-'''transform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=SR)
-transformed = transform(waveform)
-transform = torchaudio.transforms.Resample(orig_freq=SR, new_freq=sample_rate)
-transformed = transform(transformed)
-transformMin = transformed.min().item()
-transformMax = transformed.max().item()
-transformed = 2 * (transformed - transformMin) / (transformMax - transformMin) - 1'''
 
 # setup model and necessities
-model = toolbox.M5(n_input=transformed.shape[0], n_output=len(labels)).to(device)
-# model = toolbox.M5(n_input=transform.shape[0], n_output=len(labels)).to(device)
+model = toolbox.M5(n_input=waveform.shape[0], n_output=len(labels)).to(device)
 model.to(device)
  
 optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=0.0001)
@@ -94,7 +73,7 @@ total_acc = []
 with tqdm(total=EPOCHS) as pbar:
     for epoch in range(1, EPOCHS + 1):
         print("="*20 + "Training Epoch %d" % (epoch) + "="*20, flush=True)
-        toolbox.train(model, epoch, LOG_INTERVAL, train_loader, transform, optimizer, pbar, pbar_update, losses)
-        toolbox.test(model, epoch, total_acc, test_loader, transform, pbar, pbar_update)
+        toolbox.train(model, epoch, LOG_INTERVAL, train_loader, optimizer, pbar, pbar_update, losses)
+        toolbox.test(model, epoch, total_acc, test_loader, pbar, pbar_update)
         scheduler.step()
 print (f"Accuracy Plot coords: {total_acc}")
