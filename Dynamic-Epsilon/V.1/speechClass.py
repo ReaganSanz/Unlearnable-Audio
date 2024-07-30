@@ -288,7 +288,6 @@ class PerturbationTool:
         elif amp < self.epsilon_cutoff[3]:
             epVal = self.epsilon_vals[2]
         elif amp < self.epsilon_cutoff[4]:
-            print("3",flush=True)
             epVal = self.epsilon_vals[3]
         else:
             epVal = self.epsilon_vals[4]
