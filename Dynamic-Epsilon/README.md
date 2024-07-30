@@ -5,6 +5,7 @@
 
 # Progress  
 1) Min-Min has been altered to apply different epsilon values to different segments within the samples
+2) Changes made: Min-Min Function and additional global variables
 
 
 # Issues/Incomplete  
