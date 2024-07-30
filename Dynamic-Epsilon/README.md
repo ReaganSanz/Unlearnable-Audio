@@ -9,10 +9,9 @@
 
 
 # Issues/Incomplete  
-1) Need to look into using "energy" to determine epsilon value instead of using mean of the amplitude
-2) DONT need to calculate epsilon every iteration of Min-Min, can do this outside of the loop  
-3) Accuracy is still around ~25%. I want to reach 10%, while remaining inperceptable
-4) Also look into: Masks, equations for finding optimal eps values, psychoacoustic features, etc
+1) Need to look into using "energy" to determine epsilon value instead of using mean of the amplitude  
+2) Accuracy is still around ~25%. I want to reach 10%, while remaining inperceptable
+3) Also look into: Masks, equations for finding optimal eps values, psychoacoustic features, etc
 
 
    
